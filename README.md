@@ -22,7 +22,8 @@ URL: http://localhost:8080/participant/innermoneyorder
     //если ошибки не было, то это поле = null
     "message": null
 }
----
+
+
 если при переводе между аккаунтами: если у аккаунтов будут разные валюты,
 то выведется текст ошибки. На данном этапе конвертация валют не реализована.
 И перевод между аккаунтами можно осуществлять только, если аккаунты имеют одинаковую валюту.
@@ -46,7 +47,8 @@ URL: http://localhost:8080/participant/innermoneyorder
 //Strings.isNotEmpty(e.getMessage()) ? e.getMessage() : "was Exception"
 //то есть вероятность, что клиент получит сообщение с ошибкой, текст которого будет не понятен
 //тут стоит доработать свои коды ошибок и свои тексты ошибок, чтобы у клиента всегда был вменяемый текст ошибки
----
+
+
 для получения выписки по операциям 
 необходимо использовать запрос:
 URL http://localhost:8080/operation/getAllOperationsByAccId
@@ -74,7 +76,8 @@ URL http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
----
+
+
 URL http://localhost:8080/operation/getAllOperationsByAccId
 пример запроса:
 {
@@ -96,7 +99,8 @@ URL http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
----
+
+
 URL http://localhost:8080/operation/getAllOperationsByAccId
 пример запроса:
 {
@@ -134,7 +138,8 @@ URL http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
----
+
+
 Для перечисления между разными владельцами (разными Participant):
 URL http://localhost:8080/participant/externalMoneyOrder
 пример тела запроса:
@@ -172,7 +177,8 @@ http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
----
+
+
 у нас отедльно еще есть таблица с транзакциями
 зачем она нужна? - нам нужно сохранять моменты, 
 когда клиент делал перевод между счетами, 
