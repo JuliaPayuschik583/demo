@@ -1,9 +1,8 @@
 package com.example.demo.controller;
 
+import com.example.demo.TransactionStatus;
 import com.example.demo.Validator;
-import com.example.demo.db.AccountRepository;
 import com.example.demo.db.ParticipantRepository;
-import com.example.demo.db.bean.Account;
 import com.example.demo.db.bean.Participant;
 import com.example.demo.requests.ExternalMoneyOrderRequest;
 import com.example.demo.requests.InnerMoneyOrderRequest;
@@ -29,11 +28,11 @@ public class ParticipantController {
         Response response = new Response();
         try {
             participantRepository.insert(participant);
-            response.setStatus(1);
+            response.setStatus(TransactionStatus.SUCCESSFUL.getStatus());
         } catch (Exception e) {
             e.printStackTrace();
-            response.setStatus(2);
-            response.setMessage("was Exception");
+            response.setStatus(TransactionStatus.ERROR.getStatus());
+            response.setMessage(Strings.isNotEmpty(e.getMessage()) ? e.getMessage() : "was Exception");
         }
         return response;
     }
@@ -54,11 +53,11 @@ public class ParticipantController {
 
             participantRepository.sendMoney(request.getParticipantId(), request.getParticipantId(),
                     request.getFromAccId(), request.getToAccId(), request.getAmount());
-            response.setStatus(1);
+            response.setStatus(TransactionStatus.SUCCESSFUL.getStatus());
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.setStatus(2);
+            response.setStatus(TransactionStatus.ERROR.getStatus());
             response.setMessage(Strings.isNotEmpty(e.getMessage()) ? e.getMessage() : "was Exception");
         }
         return response;
@@ -76,11 +75,11 @@ public class ParticipantController {
 
             participantRepository.sendMoney(request.getFromParticipantId(), request.getToParticipantId(),
                     request.getFromAccId(), request.getToAccId(), request.getAmount());
-            response.setStatus(1);
+            response.setStatus(TransactionStatus.SUCCESSFUL.getStatus());
 
         } catch (Exception e) {
             e.printStackTrace();
-            response.setStatus(2);
+            response.setStatus(TransactionStatus.ERROR.getStatus());
             response.setMessage(Strings.isNotEmpty(e.getMessage()) ? e.getMessage() : "was Exception");
         }
         return response;
