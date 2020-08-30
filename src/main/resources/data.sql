@@ -15,7 +15,10 @@ CREATE TABLE accounts
     participant_id int not null,
     amount bigint not null,
     currency varchar(255) not null
+    --INDEX (participant_id)
 );
+
+CREATE INDEX participant_id ON accounts(participant_id);
 
 create table transactions
 (
@@ -38,6 +41,8 @@ create table operations
     date int not null,
     amount int not null
 );
+
+CREATE INDEX date ON operations(date);
 
 INSERT INTO participants (name) VALUES
 ('Bill'),
