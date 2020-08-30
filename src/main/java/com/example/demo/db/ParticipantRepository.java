@@ -1,5 +1,7 @@
 package com.example.demo.db;
 
+import com.example.demo.OperationType;
+import com.example.demo.TransactionStatus;
 import com.example.demo.Utils;
 import com.example.demo.db.bean.Account;
 import com.example.demo.db.bean.Participant;
@@ -21,6 +23,9 @@ public class ParticipantRepository {
 
     @Autowired
     TransactionRepository transactionRepository;
+
+    @Autowired
+    CurrencyRepository currencyRepository;
 
     public void insert(Participant participant) throws SQLException {
         String sql = "INSERT INTO participants (name) VALUES (?)";
@@ -54,7 +59,7 @@ public class ParticipantRepository {
         int trId = transactionRepository.insertTransaction(fromParticipantId, toParticipantId,
                 fromAccId, toAccId, unixTimestamp);
 
-        int trStatus;
+        TransactionStatus trStatus;
         String mess = null;
 
         String sql = "SELECT * FROM accounts WHERE participant_id = ? AND account_id = ?";
@@ -73,33 +78,37 @@ public class ParticipantRepository {
 
         if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
             //recalculate
-            fromAmount = 100;
+            Integer factor = currencyRepository.getFactor(fromAccount.getCurrency(), toAccount.getCurrency());
+            if (factor == null) {
+                throw new Exception("wrong currency params");
+            }
+            fromAmount = fromAccount.getAmount() * factor;
         } else {
             fromAmount = fromAccount.getAmount();
         }
 
         if (fromAmount < amount) {
-            trStatus = 2;
+            trStatus = TransactionStatus.ERROR;
             mess = "not enough money";
         } else {
             String upFromAccSql = "UPDATE accounts SET amount = amount - ? WHERE account_id = ?";
 
             int upResult1 = jdbcTemplate.update(upFromAccSql, new Object[]{amount, fromAccount.getAccountId()});
             System.out.println(upResult1);
-            if (upResult1 == 0) throw new SQLException("Participant not updated");
+            if (upResult1 == 0) throw new SQLException("Account(from) not updated");
 
             String upToAccSql = "UPDATE accounts SET amount = amount + ? WHERE account_id = ?";
 
             int upResult2 = jdbcTemplate.update(upToAccSql, new Object[]{amount, toAccount.getAccountId()});
             System.out.println(upResult2);
-            if (upResult2 == 0) throw new SQLException("Participant not updated");
+            if (upResult2 == 0) throw new SQLException("Account(to) not updated");
 
             //up status transaction
-            trStatus = 1;
+            trStatus = TransactionStatus.SUCCESSFUL;
 
             //set operations
-            this.insertOperation(trId, fromAccount.getAccountId(), 0, amount, unixTimestamp);
-            this.insertOperation(trId, toAccount.getAccountId(), 1, amount, unixTimestamp);
+            this.insertOperation(trId, fromAccount.getAccountId(), OperationType.MINUS, amount, unixTimestamp);
+            this.insertOperation(trId, toAccount.getAccountId(), OperationType.PLUS, amount, unixTimestamp);
         }
 
         //up status
@@ -107,14 +116,12 @@ public class ParticipantRepository {
 
     }
 
-
-
-    private void insertOperation(final int trId, final long accountId, final int type, final long amount,
+    private void insertOperation(final int trId, final long accountId, final OperationType type, final long amount,
                                  final long unixTimestamp) throws SQLException {
         String insertOperSql = "INSERT INTO operations (transaction_id, account_id, type, date, amount) " +
                 "VALUES (?, ?, ?, ?, ?)";
         int result = jdbcTemplate.update(insertOperSql,
-                new Object[] { trId, accountId, type, unixTimestamp, amount });
+                new Object[] { trId, accountId, type.getType(), unixTimestamp, amount });
         System.out.println(result);
         if (result == 0) throw new SQLException("operation not inserted");
     }

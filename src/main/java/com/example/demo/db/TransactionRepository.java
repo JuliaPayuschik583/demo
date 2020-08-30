@@ -1,5 +1,6 @@
 package com.example.demo.db;
 
+import com.example.demo.TransactionStatus;
 import com.example.demo.db.bean.Transaction;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class TransactionRepository {
             ps.setLong(3, fromAccId);
             ps.setLong(4, toAccId);
             ps.setLong(5, unixTimestamp);
-            ps.setInt(6, 0);
+            ps.setInt(6, TransactionStatus.START.getStatus());
             return ps;
         }, keyHolder);
         System.out.println(insertRes);
@@ -59,11 +60,11 @@ public class TransactionRepository {
         return (int) keyHolder.getKey();
     }
 
-    public void updateTransactionStatus(final int trId, final int trStatus, final String mess) throws SQLException {
+    public void updateTransactionStatus(final int trId, final TransactionStatus trStatus, final String mess) throws SQLException {
         StringBuffer upTrSql
                 = new StringBuffer("UPDATE transactions SET status = ? WHERE transaction_id = ?");
 
-        final Object[] args = new Object[]{trStatus, trId};
+        final Object[] args = new Object[]{trStatus.getStatus(), trId};
         if (Strings.isNotEmpty(mess)) {
             upTrSql.append(" AND message = ?");
             args[2] = mess;

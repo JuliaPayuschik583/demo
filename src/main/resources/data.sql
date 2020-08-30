@@ -20,6 +20,13 @@ CREATE TABLE accounts
 
 CREATE INDEX participant_id ON accounts(participant_id);
 
+CREATE TABLE currencies
+(
+    from_currency varchar(255) not null,
+    to_currency varchar(255) not null,
+    factor int not null
+);
+
 create table transactions
 (
     transaction_id int auto_increment primary key,
@@ -28,7 +35,7 @@ create table transactions
     from_account_id int not null,
     to_account_id int not null,
     date int not null,
-    status int not null comment '0-start, 1-sus, 2-error',
+    status int not null comment '0-start(created), 1-successful, 2-error',
     message varchar(255)
 );
 
@@ -51,7 +58,11 @@ INSERT INTO participants (name) VALUES
 INSERT INTO accounts (participant_id, amount, currency) VALUES
   (1, 1000, 'UAH'),
   (1, 55, 'UAH'),
-  (2, 500, 'USD');
+  (2, 500, 'USD'),
+  (1, 100, 'USD');
 
+INSERT INTO currencies (from_currency, to_currency, factor) VALUES
+('UAH', 'USD', 10),
+('USD', 'UAH', 100);
 
 --INSERT INTO transactions (from_participant_id, to_participant_id, from_account_id, to_account_id, date, status) VALUES (1,1, 1,1,  123, 0)

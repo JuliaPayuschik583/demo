@@ -5,7 +5,6 @@ public class MoneyOrderRequest {
     private Long fromAccId;
     private Long toAccId;
     private Long amount;
-    private String currency;
 
     public Long getFromAccId() {
         return fromAccId;
@@ -31,11 +30,4 @@ public class MoneyOrderRequest {
         this.amount = amount;
     }
 
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
-    }
 }
