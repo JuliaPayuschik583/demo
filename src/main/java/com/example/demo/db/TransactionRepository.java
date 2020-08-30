@@ -26,6 +26,13 @@ public class TransactionRepository {
         });
     }
 
+    public List<Transaction> getAllTransactionByPartId(int participantId) {
+        return jdbcTemplate.query("select * from transactions where from_participant_id=?",
+                new Object[]{participantId}, (resultSet, i) -> {
+            return toTransaction(resultSet);
+        });
+    }
+
     private Transaction toTransaction(ResultSet resultSet) throws SQLException {
         Transaction transaction = new Transaction();
         transaction.setTransactionId(resultSet.getInt("transaction_id"));
@@ -62,13 +69,22 @@ public class TransactionRepository {
 
     public void updateTransactionStatus(final int trId, final TransactionStatus trStatus, final String mess) throws SQLException {
         StringBuffer upTrSql
-                = new StringBuffer("UPDATE transactions SET status = ? WHERE transaction_id = ?");
+                = new StringBuffer("UPDATE transactions SET status = ?");
 
-        final Object[] args = new Object[]{trStatus.getStatus(), trId};
+        int size = 2;
         if (Strings.isNotEmpty(mess)) {
-            upTrSql.append(" AND message = ?");
-            args[2] = mess;
+            upTrSql.append(", message = ?");
+            size = 3;
         }
+        upTrSql.append(" WHERE transaction_id = ?");
+
+        final Object[] args = new Object[size];
+        args[0] = trStatus.getStatus();
+        if (Strings.isNotEmpty(mess)) {
+            args[1] = mess;
+        }
+        args[size-1] = trId;
+
         int upTrRes = jdbcTemplate.update(upTrSql.toString(), args);
         System.out.println(upTrRes);
         if (upTrRes == 0) throw new SQLException("transaction not updated");

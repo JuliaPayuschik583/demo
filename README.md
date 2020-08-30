@@ -172,3 +172,39 @@ http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
+---
+у нас отедльно еще есть таблица с транзакциями
+зачем она нужна? - нам нужно сохранять моменты, 
+когда клиент делал перевод между счетами, 
+но по каким то причинам перевод не осуществлялся,
+например, если было недостаточно денег на счету, 
+с которого осуществлялся перевод.
+
+URL http://localhost:8080/transactional/getAllTransactionByPartId
+пример тела запроса:
+{
+    "participantId": 1
+}
+тело ответа:
+[
+    {
+        "transactionId": 1,
+        "fromParticipantId": 1,
+        "toParticipantId": 1,
+        "fromAccountId": 2,
+        "toAccountId": 1,
+        "date": 1598826927,
+        "status": 2,
+        "message": "not enough money"
+    },
+    {
+        "transactionId": 2,
+        "fromParticipantId": 1,
+        "toParticipantId": 2,
+        "fromAccountId": 4,
+        "toAccountId": 3,
+        "date": 1598826967,
+        "status": 1,
+        "message": null
+    }
+]
