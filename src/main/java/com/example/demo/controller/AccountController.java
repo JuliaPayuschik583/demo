@@ -5,6 +5,7 @@ import com.example.demo.Validator;
 import com.example.demo.db.AccountRepository;
 import com.example.demo.db.bean.Account;
 import com.example.demo.responses.Response;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +42,7 @@ public class AccountController {
         } catch (Exception e) {
             e.printStackTrace();
             response.setStatus(TransactionStatus.ERROR.getStatus());
-            response.setMessage("was Exception");
+            response.setMessage(Strings.isNotEmpty(e.getMessage()) ? e.getMessage() : "was Exception");
         }
         return response;
     }
