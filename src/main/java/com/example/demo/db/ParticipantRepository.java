@@ -24,9 +24,6 @@ public class ParticipantRepository {
     @Autowired
     TransactionRepository transactionRepository;
 
-    @Autowired
-    CurrencyRepository currencyRepository;
-
     public void insert(Participant participant) throws SQLException {
         String sql = "INSERT INTO participants (name) VALUES (?)";
         int result = jdbcTemplate.update(sql, new Object[] { participant.getName() });
@@ -73,21 +70,12 @@ public class ParticipantRepository {
         if (fromAccount == null || toAccount == null) {
             throw new Exception("wrong accounts param");
         }
-
-        final long fromAmount;
-
+        //TODO add currency conversion
         if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
-            //recalculate
-            Integer factor = currencyRepository.getFactor(fromAccount.getCurrency(), toAccount.getCurrency());
-            if (factor == null) {
-                throw new Exception("wrong currency params");
-            }
-            fromAmount = fromAccount.getAmount() * factor;
-        } else {
-            fromAmount = fromAccount.getAmount();
+            throw new Exception("Currencies must be identical");
         }
 
-        if (fromAmount < amount) {
+        if (fromAccount.getAmount() < amount) {
             trStatus = TransactionStatus.ERROR;
             mess = "not enough money";
         } else {
