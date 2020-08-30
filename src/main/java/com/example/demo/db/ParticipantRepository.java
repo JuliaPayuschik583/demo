@@ -24,6 +24,9 @@ public class ParticipantRepository {
     @Autowired
     TransactionRepository transactionRepository;
 
+    @Autowired
+    OperationRepository operationRepository;
+
     public void insert(Participant participant) throws SQLException {
         String sql = "INSERT INTO participants (name) VALUES (?)";
         int result = jdbcTemplate.update(sql, new Object[] { participant.getName() });
@@ -95,8 +98,8 @@ public class ParticipantRepository {
             trStatus = TransactionStatus.SUCCESSFUL;
 
             //set operations
-            this.insertOperation(trId, fromAccount.getAccountId(), OperationType.MINUS, amount, unixTimestamp);
-            this.insertOperation(trId, toAccount.getAccountId(), OperationType.PLUS, amount, unixTimestamp);
+            operationRepository.insertOperation(trId, fromAccount.getAccountId(), OperationType.MINUS, amount, unixTimestamp);
+            operationRepository.insertOperation(trId, toAccount.getAccountId(), OperationType.PLUS, amount, unixTimestamp);
         }
 
         //up status
@@ -104,14 +107,6 @@ public class ParticipantRepository {
 
     }
 
-    private void insertOperation(final int trId, final long accountId, final OperationType type, final long amount,
-                                 final long unixTimestamp) throws SQLException {
-        String insertOperSql = "INSERT INTO operations (transaction_id, account_id, type, date, amount) " +
-                "VALUES (?, ?, ?, ?, ?)";
-        int result = jdbcTemplate.update(insertOperSql,
-                new Object[] { trId, accountId, type.getType(), unixTimestamp, amount });
-        System.out.println(result);
-        if (result == 0) throw new SQLException("operation not inserted");
-    }
+
 
 }

@@ -1,5 +1,6 @@
 package com.example.demo.db;
 
+import com.example.demo.OperationType;
 import com.example.demo.db.bean.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,5 +37,15 @@ public class OperationRepository {
         operation.setDate(resultSet.getLong("date"));
         operation.setAmount(resultSet.getLong("amount"));
         return operation;
+    }
+
+    public void insertOperation(final int trId, final long accountId, final OperationType type, final long amount,
+                                 final long unixTimestamp) throws SQLException {
+        String insertOperSql = "INSERT INTO operations (transaction_id, account_id, type, date, amount) " +
+                "VALUES (?, ?, ?, ?, ?)";
+        int result = jdbcTemplate.update(insertOperSql,
+                new Object[] { trId, accountId, type.getType(), unixTimestamp, amount });
+        System.out.println(result);
+        if (result == 0) throw new SQLException("operation not inserted");
     }
 }
