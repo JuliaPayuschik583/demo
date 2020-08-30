@@ -57,8 +57,7 @@ public class ParticipantRepository {
         int trStatus;
         String mess = null;
 
-        String sql = "SELECT a.* FROM accounts AS a JOIN participants AS p " +
-                "ON a.participant_id = p.participant_id WHERE p.participant_id = ? AND a.account_id = ?";
+        String sql = "SELECT * FROM accounts WHERE participant_id = ? AND account_id = ?";
 
         Account fromAccount = jdbcTemplate.queryForObject(sql, new Object[]{fromParticipantId, fromAccId}, (rs, rowNum) ->
                 new Account(rs));
@@ -80,12 +79,9 @@ public class ParticipantRepository {
         }
 
         if (fromAmount < amount) {
-            //throw new Exception("not enough money");
-            //up status transaction
             trStatus = 2;
             mess = "not enough money";
         } else {
-
             String upFromAccSql = "UPDATE accounts SET amount = amount - ? WHERE account_id = ?";
 
             int upResult1 = jdbcTemplate.update(upFromAccSql, new Object[]{amount, fromAccount.getAccountId()});

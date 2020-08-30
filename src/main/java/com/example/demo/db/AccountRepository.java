@@ -34,9 +34,7 @@ public class AccountRepository {
     }
 
     public List<Account> getAccountListByParticipantId(long participantId) {
-        String sql = "SELECT a.* FROM accounts a " +
-                "JOIN participants p ON a.participant_id=p.participant_id " +
-                "WHERE p.participant_id = ?";
+        String sql = "SELECT * FROM accounts WHERE participant_id = ?";
 
         return jdbcTemplate.query(sql, new Object[]{participantId},
                 new int[]{Types.INTEGER},

@@ -25,7 +25,7 @@ create table transactions
     from_account_id int not null,
     to_account_id int not null,
     date int not null,
-    status int not null,
+    status int not null comment '0-start, 1-sus, 2-error',
     message varchar(255)
 );
 
@@ -34,7 +34,7 @@ create table operations
     operation_id int auto_increment primary key,
     transaction_id int not null,
     account_id int not null,
-    type int not null comment '1+add(plus) 0-remote(minus)',
+    type int not null comment '1+add(plus) 0-subtract(minus)',
     date int not null,
     amount int not null
 );

@@ -18,9 +18,9 @@ public class OperationRepository {
 
     public List<Operation> getAllOperationsByAccId(long participantId, long accountId) {
         String sql = "SELECT o.* FROM accounts a " +
-                "JOIN participants p ON a.participant_id=p.participant_id " +
                 "JOIN operations o ON a.account_id=o.account_id " +
-                "WHERE p.participant_id = ? AND a.account_id = ?";
+                "WHERE a.participant_id = ? AND a.account_id = ? " +
+                "ORDER BY o.date DESC";
 
         return jdbcTemplate.query(sql, new Object[]{participantId, accountId},
                 new int[]{Types.INTEGER, Types.INTEGER},
