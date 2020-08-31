@@ -52,7 +52,7 @@ public class ParticipantRepository {
 
     @Transactional
     public void sendMoney(long fromParticipantId, long toParticipantId, long fromAccId, long toAccId,
-                          final long amount) throws Exception {
+                          final long amount) throws SQLException {
         final long unixTimestamp = Utils.getUnixTimestamp();
 
         //set in transaction
@@ -71,14 +71,13 @@ public class ParticipantRepository {
                 new Account(rs));
 
         if (fromAccount == null || toAccount == null) {
-            throw new Exception("wrong accounts param");
-        }
-        //TODO add currency conversion
-        if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
-            throw new Exception("Currencies must be identical");
-        }
-
-        if (fromAccount.getAmount() < amount) {
+            trStatus = TransactionStatus.ERROR;
+            mess = "wrong accounts param";
+        } else if (!fromAccount.getCurrency().equals(toAccount.getCurrency())) {
+            //TODO add currency conversion
+            trStatus = TransactionStatus.ERROR;
+            mess = "Currencies must be identical";
+        } else if (fromAccount.getAmount() < amount) {
             trStatus = TransactionStatus.ERROR;
             mess = "not enough money";
         } else {
