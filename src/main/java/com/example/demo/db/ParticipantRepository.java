@@ -52,7 +52,7 @@ public class ParticipantRepository {
 
     @Transactional
     public void sendMoney(long fromParticipantId, long toParticipantId, long fromAccId, long toAccId,
-                          final long amount) throws SQLException {
+                          final long amount) throws Exception {
         final long unixTimestamp = Utils.getUnixTimestamp();
 
         //set in transaction
@@ -103,6 +103,10 @@ public class ParticipantRepository {
 
         //up status
         transactionRepository.updateTransactionStatus(trId, trStatus, mess);
+
+        if (TransactionStatus.ERROR.equals(trStatus)) {
+            throw new Exception(mess);
+        }
 
     }
 
