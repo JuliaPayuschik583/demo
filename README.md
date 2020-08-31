@@ -1,9 +1,64 @@
 # API
+Файл resources/data.sql - содержит таблицы, при запуске приложения (класс DemoApplication) необходимо зайти на "http://localhost:8080/h2-console/" (пароль: 11), скопировать содержимое файла (data.sql) и выполнить SQL запросы по созданию таблиц и вставке базовых параметров в таблицы. При запуске тестов (DemoApplicationTests) содержимое файла data.sql самостоятлеьно вставится в базу данных.
+
+Описание таблиц:
+//таблица владельцев счетов:
+```
+CREATE TABLE participants 
+(
+    participant_id int auto_increment primary key,
+    name           varchar(255) not null
+);
+```
+//таблица счетов:
+```
+CREATE TABLE accounts 
+(
+    account_id int auto_increment primary key,
+    participant_id int not null,
+    amount bigint not null,
+    currency varchar(255) not null
+    --INDEX (participant_id)
+);
+
+CREATE INDEX participant_id ON accounts(participant_id);
+```
+//таблица транзакций. Она необходимо для сохранения перевода между счетами.
+//если клиент делал перевод с одного счета на другой, и не было достаточно денежных средств - этот вариант запишется в транзакцию со статусом =2(ошибка) и текстом сообщения = недостаточно денег.
+```
+create table transactions
+(
+    transaction_id int auto_increment primary key,
+    from_participant_id int not null,
+    to_participant_id int not null,
+    from_account_id int not null,
+    to_account_id int not null,
+    date int not null,
+    status int not null comment '0-start(created), 1-successful, 2-error',
+    message varchar(255)
+);
+```
+//таблица, хранящая операции над счетами
+```
+create table operations
+(
+    operation_id int auto_increment primary key,
+    transaction_id int not null,
+    account_id int not null,
+    type int not null comment '1+add(plus) 0-subtract(minus)',
+    date int not null,
+    amount int not null
+);
+
+CREATE INDEX date ON operations(date);
+```
+
 Для перевода с одного аккаунта на другой в рамках одного хозяина счетов (Participant):
 запрос: 
 HTTP POST + JSON
 URL: http://localhost:8080/participant/innermoneyorder
 тело запроса:
+```
 {
     "participantId": 1,
     "fromAccId": 1, //перевод с какого аккаунта
@@ -13,7 +68,9 @@ URL: http://localhost:8080/participant/innermoneyorder
     //они позволяют фиксировать сколько символов после зарятой учитывать
     //и какое правило будет использоваться при округлении
 }
+```
 тело ответа:
+```
 {
     "status": 1, //в ответе у нас возращается статус, 
     //который дает понять выполнился ли запрос, 
@@ -22,7 +79,7 @@ URL: http://localhost:8080/participant/innermoneyorder
     //если ошибки не было, то это поле = null
     "message": null
 }
-
+```
 
 если при переводе между аккаунтами: если у аккаунтов будут разные валюты,
 то выведется текст ошибки. На данном этапе конвертация валют не реализована.
@@ -30,17 +87,21 @@ URL: http://localhost:8080/participant/innermoneyorder
 например запрос:
 URL: http://localhost:8080/participant/innermoneyorder
 пример тела запроса:
+```
 {
     "participantId": 1,
     "fromAccId": 1,
     "toAccId": 4,
     "amount": 5
 }
+```
 пример ответа с ошибкой:
+```
 {
     "status": 2,
     "message": "Currencies must be identical"
 }
+```
 - будет выдан текст, что валюты должны быть одинаковыми.
 //TODO в тексте ошибки не всегда тот текст, который явно указан на backend-е
 //т.к. в коде у нас указано:
@@ -51,13 +112,18 @@ URL: http://localhost:8080/participant/innermoneyorder
 
 для получения выписки по операциям 
 необходимо использовать запрос:
+```
 URL http://localhost:8080/operation/getAllOperationsByAccId
+```
 пример тела запроса:
+```
 {
     "participantId": 1, //указываем, какой participant хочет получить выписку
     "accountId": 1 //и указываем выписку по какому счет хотим получить
 }
+```
 пример ответа:
+```
 {
     "status": 1,
     "message": null,
@@ -76,15 +142,20 @@ URL http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
+```
 
-
+```
 URL http://localhost:8080/operation/getAllOperationsByAccId
+```
 пример запроса:
+```
 {
     "participantId": 1,
     "accountId": 2
 }
+```
 пример ответа:
+```
 {
     "status": 1,
     "message": null,
@@ -99,15 +170,20 @@ URL http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
+```
 
-
+```
 URL http://localhost:8080/operation/getAllOperationsByAccId
+```
 пример запроса:
+```
 {
     "participantId": 1,
     "accountId": 1
 }
+```
 пример ответа:
+```
 {
     "status": 1,
     "message": null,
@@ -138,11 +214,14 @@ URL http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
-
+```
 
 Для перечисления между разными владельцами (разными Participant):
+```
 URL http://localhost:8080/participant/externalMoneyOrder
+```
 пример тела запроса:
+```
 {
     "fromParticipantId": 1,
     "toParticipantId": 2,
@@ -150,19 +229,27 @@ URL http://localhost:8080/participant/externalMoneyOrder
     "toAccId": 3,
     "amount": 15
 }
+```
 пример тела ответа:
+```
 {
     "status": 1,
     "message": null
 }
-проверяем:
+```
+- проверяем:
 тело запроса:
+```
 http://localhost:8080/operation/getAllOperationsByAccId
+```
+```
 {
     "participantId": 2,
     "accountId": 3
 }
+```
 тело ответа:
+```
 {
     "status": 1,
     "message": null,
@@ -177,7 +264,7 @@ http://localhost:8080/operation/getAllOperationsByAccId
         }
     ]
 }
-
+```
 
 у нас отедльно еще есть таблица с транзакциями
 зачем она нужна? - нам нужно сохранять моменты, 
@@ -185,13 +272,17 @@ http://localhost:8080/operation/getAllOperationsByAccId
 но по каким то причинам перевод не осуществлялся,
 например, если было недостаточно денег на счету, 
 с которого осуществлялся перевод.
-
+```
 URL http://localhost:8080/transactional/getAllTransactionByPartId
+```
 пример тела запроса:
+```
 {
     "participantId": 1
 }
+```
 тело ответа:
+```
 [
     {
         "transactionId": 1,
@@ -214,3 +305,4 @@ URL http://localhost:8080/transactional/getAllTransactionByPartId
         "message": null
     }
 ]
+```
