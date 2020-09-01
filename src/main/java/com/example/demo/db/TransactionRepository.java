@@ -71,19 +71,19 @@ public class TransactionRepository {
         StringBuffer upTrSql
                 = new StringBuffer("UPDATE transactions SET status = ?");
 
-        int size = 2;
+        final Object[] args;
         if (Strings.isNotEmpty(mess)) {
             upTrSql.append(", message = ?");
-            size = 3;
-        }
-        upTrSql.append(" WHERE transaction_id = ?");
-
-        final Object[] args = new Object[size];
-        args[0] = trStatus.getStatus();
-        if (Strings.isNotEmpty(mess)) {
+            args = new Object[3];
+            args[0] = trStatus.getStatus();
             args[1] = mess;
+        } else {
+            args = new Object[2];
+            args[0] = trStatus.getStatus();
         }
-        args[size-1] = trId;
+        args[args.length-1] = trId;
+
+        upTrSql.append(" WHERE transaction_id = ?");
 
         int upTrRes = jdbcTemplate.update(upTrSql.toString(), args);
         System.out.println(upTrRes);
