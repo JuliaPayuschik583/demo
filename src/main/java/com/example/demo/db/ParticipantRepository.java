@@ -35,12 +35,8 @@ public class ParticipantRepository {
     }
 
     public List<Participant> getAll() {
-        return jdbcTemplate.query("select * from participants", new RowMapper<Participant>() {
-            @Override
-            public Participant mapRow(ResultSet resultSet, int i) throws SQLException {
-                return ParticipantRepository.this.toParticipant(resultSet);
-            }
-        });
+        return jdbcTemplate.query("select * from participants",
+                (resultSet, i) -> ParticipantRepository.this.toParticipant(resultSet));
     }
 
     private Participant toParticipant(ResultSet resultSet) throws SQLException {
